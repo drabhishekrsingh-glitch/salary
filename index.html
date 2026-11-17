@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Salary Calculator</title>
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#EAF2FF; --card:#FFFFFF; --text:#0B1B33; --sub:#5F7391; --line:#E3ECF8;
+  --blue:#007AFF; --blue2:#0A5FD6; --field:#F1F6FD;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0A1424; --card:#12203A; --text:#EAF2FF; --sub:#8FA5C4; --line:#1D2E4D;
+    --blue:#3D9BFF; --blue2:#0A5FD6; --field:#0E1A30; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0A1424; --card:#12203A; --text:#EAF2FF; --sub:#8FA5C4; --line:#1D2E4D;
+  --blue:#3D9BFF; --blue2:#0A5FD6; --field:#0E1A30; color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;line-height:1.35;
+}
+.wrap{max-width:520px;margin:0 auto;padding:28px 16px 48px}
+h1{font-size:34px;font-weight:700;letter-spacing:-.02em;margin:8px 4px 2px}
+.lead{margin:0 4px 20px;color:var(--sub);font-size:15px}
+.card{background:var(--card);border-radius:18px;overflow:hidden;margin-bottom:20px}
+.group-title{margin:0 16px 8px;font-size:13px;color:var(--sub);font-weight:500}
+.input-card{padding:18px}
+.input-card label{display:block;font-size:15px;color:var(--sub);margin-bottom:8px}
+.field{display:flex;align-items:center;background:var(--field);border-radius:14px;padding:4px 14px}
+.field span{font-size:28px;font-weight:600;color:var(--blue);margin-right:6px}
+.field input{
+  flex:1;min-width:0;border:0;background:transparent;outline:none;color:var(--text);
+  font:inherit;font-size:32px;font-weight:700;letter-spacing:-.02em;padding:10px 0;
+}
+.field:focus-within{box-shadow:0 0 0 3px color-mix(in srgb,var(--blue) 35%,transparent)}
+.seg{display:flex;background:var(--field);border-radius:10px;padding:2px;margin-top:14px}
+.seg button{
+  flex:1;border:0;background:transparent;color:var(--text);font:inherit;font-size:14px;font-weight:500;
+  padding:8px 0;border-radius:8px;cursor:pointer;transition:background .2s,box-shadow .2s;
+}
+.seg button[aria-pressed="true"]{background:var(--card);box-shadow:0 1px 4px rgba(0,60,140,.18);font-weight:600}
+.seg button:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+.hero{
+  background:linear-gradient(160deg,#2E93FF 0%,#007AFF 45%,#0A5FD6 100%);
+  color:#fff;border-radius:22px;padding:22px 20px;margin-bottom:20px;
+}
+.hero small{display:block;font-size:14px;opacity:.85}
+.hero .big{font-size:40px;font-weight:700;letter-spacing:-.025em;margin:2px 0 14px;font-variant-numeric:tabular-nums}
+.hero .hrow{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid rgba(255,255,255,.28);padding-top:12px}
+.hero .hrow b{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;font-size:17px}
+.card .row+.row{border-top:1px solid var(--line)}
+.row .v{font-variant-numeric:tabular-nums;font-weight:500}
+.row.strong{font-weight:600}
+.row.strong .v{color:var(--blue);font-weight:700}
+.note{color:var(--sub);font-size:13px;margin:4px 8px 0;text-align:center}
+.reset{
+  display:block;width:100%;border:0;border-radius:14px;padding:15px;font:inherit;font-size:17px;font-weight:600;
+  background:var(--blue);color:#fff;cursor:pointer;margin-bottom:14px;
+}
+.reset:active{background:var(--blue2)}
+.reset:focus-visible{outline:3px solid color-mix(in srgb,var(--blue) 40%,transparent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>Salary</h1>
+  <p class="lead">Enter your basic salary to see every component.</p>
+
+  <section class="card input-card">
+    <label for="basic">Basic Salary (per month)</label>
+    <div class="field"><span>₹</span><input id="basic" type="text" inputmode="decimal" autocomplete="off" placeholder="0"></div>
+    <div class="seg" role="group" aria-label="Period">
+      <button type="button" data-p="1" aria-pressed="true">Monthly</button>
+      <button type="button" data-p="12" aria-pressed="false">Annual</button>
+    </div>
+  </section>
+
+  <section class="hero" aria-live="polite">
+    <small>Total Gross</small>
+    <div class="big" id="h-total">₹0</div>
+    <div class="hrow"><small>Net Gross</small><b id="h-net">₹0</b></div>
+  </section>
+
+  <h2 class="group-title">Earnings</h2>
+  <section class="card">
+    <div class="row"><span>Basic Salary</span><span class="v" id="o-basic">₹0</span></div>
+    <div class="row"><span>NPA</span><span class="v" id="o-npa">₹0</span></div>
+    <div class="row"><span>HRA</span><span class="v" id="o-hra">₹0</span></div>
+    <div class="row"><span>DA</span><span class="v" id="o-da">₹0</span></div>
+    <div class="row"><span>Transport Allowance</span><span class="v" id="o-ta">₹0</span></div>
+  </section>
+
+  <h2 class="group-title">Net Salary</h2>
+  <section class="card">
+    <div class="row strong"><span>Net Salary</span><span class="v" id="o-net">₹0</span></div>
+    <div class="row strong"><span>Net Salary with TA</span><span class="v" id="o-netta">₹0</span></div>
+  </section>
+
+  <h2 class="group-title">NPS Contributions</h2>
+  <section class="card">
+    <div class="row"><span>Self</span><span class="v" id="o-nself">₹0</span></div>
+    <div class="row"><span>Employer</span><span class="v" id="o-nemp">₹0</span></div>
+  </section>
+
+  <h2 class="group-title">Gross</h2>
+  <section class="card">
+    <div class="row strong"><span>Total Gross</span><span class="v" id="o-total">₹0</span></div>
+    <div class="row strong"><span>Net Gross</span><span class="v" id="o-ngross">₹0</span></div>
+  </section>
+
+  <button class="reset" id="reset" type="button">Clear</button>
+</main>
+
+<script>
+(function(){
+  var period = 1;
+  var input = document.getElementById('basic');
+  var fmt = new Intl.NumberFormat('en-IN',{maximumFractionDigits:2,minimumFractionDigits:0});
+  function money(n){ return '\u20B9' + fmt.format(Math.round(n*100)/100); }
+  function set(id, n){ document.getElementById(id).textContent = money(n * period); }
+  function parse(){
+    var v = parseFloat(String(input.value).replace(/,/g,''));
+    return isFinite(v) && v > 0 ? v : 0;
+  }
+  function calc(){
+    var x = parse();
+    var basic = x;
+    var npa = 0.20 * x;
+    var hra = 0.30 * x;
+    var da = 0.63 * (basic + npa);
+    var ta = x > 0 ? 7200 + 0.63 * 7200 : 0;
+    var net = basic + npa + da;
+    var netTA = net + ta;
+    var nSelf = 0.10 * net;
+    var nEmp = 0.14 * net;
+    var total = basic + npa + hra + da + ta + nSelf + nEmp;
+    var netGross = basic + npa + hra + da + ta;
+    set('o-basic',basic); set('o-npa',npa); set('o-hra',hra); set('o-da',da); set('o-ta',ta);
+    set('o-net',net); set('o-netta',netTA);
+    set('o-nself',nSelf); set('o-nemp',nEmp);
+    set('o-total',total); set('o-ngross',netGross);
+    set('h-total',total); set('h-net',netGross);
+  }
+  input.addEventListener('input', function(){
+    var cleaned = input.value.replace(/[^0-9.,]/g,'');
+    if (cleaned !== input.value) input.value = cleaned;
+    calc();
+  });
+  document.querySelectorAll('.seg button').forEach(function(b){
+    b.addEventListener('click', function(){
+      period = parseInt(b.getAttribute('data-p'),10);
+      document.querySelectorAll('.seg button').forEach(function(o){
+        o.setAttribute('aria-pressed', o === b ? 'true' : 'false');
+      });
+      calc();
+    });
+  });
+  document.getElementById('reset').addEventListener('click', function(){
+    input.value = ''; input.focus(); calc();
+  });
+  calc();
+})();
+</script>
+</body>
+</html>
